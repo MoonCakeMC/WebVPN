@@ -4,11 +4,11 @@ export default {
   // WebVPN 域名是否支持 https
   httpsEnabled: true,
   // WebVPN 服务端口
-  port: 80,
+  port: 24995,
   // WebVPN https 服务端口
-  httpsPort: 443,
+  httpsPort: 24996,
   // WebVPN 服务网址，访问其他网站，都从这个网址进行转换
-  site: new URL('http://www.webvpn.info'),
+  site: new URL('https://www.147483647.xyz:25000'),
   // cluster 模式用几个进程（为了充分利用CPU核心数）
   numProcesses: 4,
   // 是否启用缓存，会把静态资源缓存到本地文件夹以加速后续的网站访问
@@ -32,11 +32,13 @@ export default {
   // 是否禁用 devtools
   disableDevtools: true,
   // 域名编码模式，original (域名原名直接作为多级子域名) | underline（域名原名去除 . :）
-  domainMode: 'underline', // underline 不支持 cookie 的 domain 设置 ！！！！！！
+  domainMode: 'original', // underline 不支持 cookie 的 domain 设置 ！！！！！！
   // 无法使用泛解析情况下，可使用单个二级域名代理指定网站
   // 但请注意，有些网站会引用第三方网站的资源，那么第三方网站你也要代理
   subdomains: {
     'baidu': 'www.baidu.com',
     'im': 'im.qq.com'
-  }
+  },
+  // 使用者是否为 MoonCake__MC, 用于部分个人偏好配置
+  isYBMC: true
 }

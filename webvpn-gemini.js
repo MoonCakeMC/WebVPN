@@ -126,6 +126,7 @@ class WebVPN {
     `
     eval(this.convertDomainsCode)
 
+    // 修改点 1：Worker 中的 transformUrl 逻辑，强制使用 HTTPS 域名并标记 HTTP 协议
     this.jsWorkerContextCode = `
       // worker 里面创造 __context__ 环境
       if (!self.window) {
@@ -148,9 +149,21 @@ class WebVPN {
             url = new URL(url, target.href).href
           }
           const u = new URL(url)
-          const vpnDomain = u.protocol === 'http:' ? httpVpnDomain : httpsVpnDomain
+          
+          // 强制走 HTTPS VPN 域名
+          const vpnDomain = httpsVpnDomain
           if (u.host.includes(vpnDomain)) return url
-          return url.replace(u.host, encodeHost(u.host) + vpnDomain)
+
+          let host = u.host
+          let currentUrl = url
+          
+          // 如果源站是 HTTP，标记 Host 并将协议改为 HTTPS
+          if (u.protocol === 'http:') {
+             host = 'http-' + host
+             currentUrl = currentUrl.replace('http:', 'https:')
+          }
+
+          return currentUrl.replace(u.host, encodeHost(host) + vpnDomain)
         }
 
         self.webvpn = { target, site, transformUrl }
@@ -513,17 +526,26 @@ class WebVPN {
     ctx.body = res.data
   }
 
+  // 修改点 2：routeInit 中检测 http- 标记，恢复 HTTP 协议
   async routeInit (ctx) {
     const { isMainSession, shareId } = await this.checkShareSession(ctx)
-    const domain = decodeHost(ctx.subdomain)
-    const url = ctx.scheme + '://' + domain + ctx.url
+    let domain = decodeHost(ctx.subdomain)
+    let scheme = ctx.scheme
+
+    // 检测到 http- 前缀，说明源站是 HTTP
+    if (domain.startsWith('http-')) {
+      domain = domain.replace('http-', '')
+      scheme = 'http'
+    }
+
+    const url = scheme + '://' + domain + ctx.url
     ctx.meta = {
       shareId,
       isMainSession,
       url,
       isXHR: ctx.request.headers['x-requested-with'] === 'XMLHttpRequest',
       mime: this.getResponseType(ctx, url),
-      scheme: ctx.scheme,
+      scheme: scheme, // 保持原始请求的 scheme (https)
       target:  new URL(url),
       host: ctx.headers['host'],
       origin: ctx.headers['origin'],
@@ -784,11 +806,20 @@ class WebVPN {
     return res.data
   }
 
+  // 修改点 3：Server 端的 transformUrl 逻辑
   transformUrl (ctx, url) {
-    const { httpVpnDomain, httpsVpnDomain } = this.config
+    const { httpsVpnDomain } = this.config
     const u = new URL(url)
-    const vpnDomain = u.protocol === 'http:' ? httpVpnDomain : httpsVpnDomain
-    return url.replace(u.host, encodeHost(u.host) + vpnDomain)
+    
+    // 强制使用 HTTPS Domain，如果是 http 协议则打标记
+    let host = u.host
+    let newUrl = url
+    if (u.protocol === 'http:') {
+      host = 'http-' + host
+      newUrl = newUrl.replace('http:', 'https:')
+    }
+
+    return newUrl.replace(u.host, encodeHost(host) + httpsVpnDomain)
   }
 
   processHtml (ctx, res) {
@@ -1110,10 +1141,15 @@ class WebVPN {
     }
   }
 
+  // 修改点 4：convertHost 处理，移除 http- 前缀
   convertHost (host) {
     const { httpVpnDomain, httpsVpnDomain } = this.config
     host = host.split('-')[0].replace(httpsVpnDomain, '').replace(httpVpnDomain, '')
-    return decodeHost(host)
+    let decoded = decodeHost(host)
+    if (decoded.startsWith('http-')) {
+      decoded = decoded.replace('http-', '')
+    }
+    return decoded
   }
 
   async convertCharsetData (ctx, headers, res) {

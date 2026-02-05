@@ -157,17 +157,16 @@ function calcUrl () {
 }
 
 function transformUrl (url) {
-  const { httpsEnabled, port, httpsPort } = config
+  const { httpsEnabled, port, httpsPort, isYBMC } = config
   const u = new URL(url)
-  const subdomain = encodeHost(u.host)
-  const protocol = httpsEnabled ? u.protocol : 'http:'
-  let origin = protocol + '//' + site.hostname
-  if (protocol === 'https:' && httpsPort !== 443) {
-    origin += ':' + httpsPort
-  } else if (protocol === 'http:' && port !== 80) {
-    origin += ':' + port
-  }
-  origin = origin.replace('www', subdomain)
+  u.host = encodeHost(u.host) + site.hostname.replace("www", "") + ":25000"
+  u.searchParams.set("__wevbpn_origin_scheme__", u.protocol.slice(0, -1))
+  // if (u.protocol === 'https:' && httpsPort !== 443) {
+  //   u.host += ':' + isYBMC ? "25000" : httpsPort
+  // } else if (u.protocol === 'http:' && port !== 80) {
+  //   u.host += ':' + isYBMC ? "25000" : port
+  // }
+  u.protocol = httpsEnabled ? "https:" : 'http:'
   return url.replace(u.origin, origin)
 }
 

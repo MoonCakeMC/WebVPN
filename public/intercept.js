@@ -134,19 +134,21 @@
       url = url.slice(url.indexOf('http'))
     }
     const u = new URL(url)
-    const vpnDomain = u.protocol === 'https:' ? httpsVpnDomain : httpVpnDomain
+    if (httpsEnabled){
+        u.host = encodeHost(u.host) + httpsVpnDomain
+    }
+    else{
+        u.host = encodeHost(u.host) + (u.protocol === 'http:' ? httpVpnDomain : httpsVpnDomain)
+    }
+    u.searchParams.set("__wevbpn_origin_scheme__", u.protocol.slice(0, -1))
+    u.protocol = 1 ? "https:" : "http:"
     if (u.host.includes(vpnDomain)) {
       // if (url.startsWith('http') && webvpn.protocol === 'http:') {
         // return url.replace('https://', 'http://')
       // }
       return url
     }
-    let subdomain = encodeHost(u.host)
-    const hostPrefix = location.host.replace(vpnDomain, '')
-    if (!hostPrefix.includes('.') && hostPrefix.includes('-')) {
-      subdomain += '-' + hostPrefix.split('-').slice(-2).join('-')
-    }
-    return url.replace(u.host, subdomain + vpnDomain)
+    return u.toString()
   }
 
   const decodeUrl = (url) => {
