@@ -16,7 +16,7 @@ export default {
   // 缓存文件夹地址
   cacheDir: 'cache',
   // 是否在浏览器控制台打印拦截操作的日志
-  interceptLog: false,
+  interceptLog: true,
   // 是否禁止跳转
   disableJump: false,
   // 是否在页面跳转前询问用户，由用户决定是否允许网页跳转
@@ -28,11 +28,11 @@ export default {
   // 是否启用插件
   enablePlugins: true,
   // 是否开启调试（当前是VConsole）
-  debug: false,
+  debug: true,
   // 是否禁用 devtools
-  disableDevtools: true,
+  disableDevtools: false,
   // 域名编码模式，original (域名原名直接作为多级子域名) | underline（域名原名去除 . :）
-  domainMode: 'original', // underline 不支持 cookie 的 domain 设置 ！！！！！！
+  domainMode: 'underline', // underline 不支持 cookie 的 domain 设置 ！！！！！！
   // 无法使用泛解析情况下，可使用单个二级域名代理指定网站
   // 但请注意，有些网站会引用第三方网站的资源，那么第三方网站你也要代理
   subdomains: {

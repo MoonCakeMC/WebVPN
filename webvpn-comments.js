@@ -199,7 +199,7 @@ class WebVPN {
           else{
               u.host = encodeHost(u.host) + (u.protocol === 'http:' ? httpVpnDomain : httpsVpnDomain)
           }
-          u.searchParams.set("__wevbpn_origin_scheme__", u.protocol.slice(0, -1))
+          u.searchParams.set("__webvpn_origin_scheme__", u.protocol.slice(0, -1))
           u.protocol = httpsEnabled ? "https:" : "http:"
           if (u.host.includes(vpnDomain)) return url // 已经是 VPN 域名则不处理
           return u.toString()
@@ -943,7 +943,7 @@ class WebVPN {
     else{
         u.host = encodeHost(u.host) + (u.protocol === 'http:' ? httpVpnDomain : httpsVpnDomain)
     }
-    u.searchParams.set("__wevbpn_origin_scheme__", u.protocol.slice(0, -1))
+    u.searchParams.set("__webvpn_origin_scheme__", u.protocol.slice(0, -1))
     u.protocol = httpsEnabled ? "https:": "http:"
     // 将 host 编码后拼接 VPN 域名
 

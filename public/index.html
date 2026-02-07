@@ -160,14 +160,14 @@ function transformUrl (url) {
   const { httpsEnabled, port, httpsPort, isYBMC } = config
   const u = new URL(url)
   u.host = encodeHost(u.host) + site.hostname.replace("www", "") + ":25000"
-  u.searchParams.set("__wevbpn_origin_scheme__", u.protocol.slice(0, -1))
+  u.searchParams.set("__webvpn_origin_scheme__", u.protocol.slice(0, -1))
   // if (u.protocol === 'https:' && httpsPort !== 443) {
   //   u.host += ':' + isYBMC ? "25000" : httpsPort
   // } else if (u.protocol === 'http:' && port !== 80) {
   //   u.host += ':' + isYBMC ? "25000" : port
   // }
   u.protocol = httpsEnabled ? "https:" : 'http:'
-  return url.replace(u.origin, origin)
+  return u.toString()
 }
 
 function decodeUrl (url) {

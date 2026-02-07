@@ -10,7 +10,7 @@
   const sourceU = new URL(webvpn.sourceUrl)
   const pageU = new URL(webvpn.pageUrl)
   const base = webvpn.base
-  const { httpVpnDomain, httpsVpnDomain } = webvpn
+  const { httpsEnabled, vpnDomain, httpVpnDomain, httpsVpnDomain } = webvpn
 
   /* <html> 之前的 <script> 代码，获取不到 location.href 等网址信息，通过 webvpn.sourceUrl 来提供 */
   const location = new Proxy(window.location, {
@@ -121,8 +121,25 @@
         return url
       }
     }
+    console.log("url: " + url)
+    console.log(!url || url.split('?')[0].indexOf('//') < 0)
     if (!url || url.split('?')[0].indexOf('//') < 0) {
-      return url
+      if (new URL(window.location.href).searchParams.get("__webvpn_origin_scheme__")){
+        if (url.indexOf('?') < 0){
+          return url + "?__webvpn_origin_scheme__=" + new URL(window.location.href).searchParams.get("__webvpn_origin_scheme__")
+        }
+        else{
+          if (url.indexOf("__webvpn_origin_scheme__") < 0){
+            return url+ "&__webvpn_origin_scheme__=" + new URL(window.location.href).searchParams.get("__webvpn_origin_scheme__")
+          }
+          else{
+            return url
+          }
+        }
+      }
+      else{
+        return url
+      }
     }
     if (url.indexOf('http') < 0 && url.indexOf('//') > 0) {
       url = url.slice(url.indexOf('//'))
@@ -140,7 +157,7 @@
     else{
         u.host = encodeHost(u.host) + (u.protocol === 'http:' ? httpVpnDomain : httpsVpnDomain)
     }
-    u.searchParams.set("__wevbpn_origin_scheme__", u.protocol.slice(0, -1))
+    u.searchParams.set("__webvpn_origin_scheme__", u.protocol.slice(0, -1))
     u.protocol = 1 ? "https:" : "http:"
     if (u.host.includes(vpnDomain)) {
       // if (url.startsWith('http') && webvpn.protocol === 'http:') {
@@ -148,6 +165,7 @@
       // }
       return url
     }
+    console.log("intercept.js: ", u.toString())
     return u.toString()
   }
 
